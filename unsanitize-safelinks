@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+# Copyright (c) 2018-2019 Achim D. Brucker.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# SPDX-License-Identifier: BSD-2-Clause
+
+import sys
+import os.path as path
+import os
+import stat
+import argparse
+import re
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse, parse_qs, urlunparse
+
+def sanitize_safelink(url):
+    if "safelinks.protection.outlook.com" in url:
+        target = urlparse(parse_qs(urlparse(url).query)['url'][0])
+        return target.geturl()
+    else:
+        return url
+
+def unsanitize_txt(content):
+    return re.sub(
+        r'(http[s]?://(?:[a-zA-Z]|[0-9]|[$-\'\/\+-;=\?-@.&+_]|[!*,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)',
+        lambda x: (sanitize_safelink(x.group(1))), content).rstrip()
+
+def unsanitize_html(content):
+    soup = BeautifulSoup(content, "html.parser")
+    for a in soup.findAll('a'):
+        if a.has_attr('originalsrc'):
+            a['safelink'] = a['href']
+            a['href'] = a['originalsrc']
+            del a['originalsrc']
+    return str(soup)
+
+def main():
+    """Main function of the safelink tool."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--html",
+        help="HTML",
+        action="store_true",
+        default=False)
+    parser.add_argument(
+        "-i",
+        "--in-situ",
+        help="modify file",
+        action="store_true",
+        default=False)
+    parser.add_argument(
+        "-v", "--verbose", help="increase verbosity", action="store_true")
+    parser.add_argument('file', nargs='?', default=None)
+    args = parser.parse_args()
+
+# parse command line
+    if args.file:
+        fhandle = open(args.file)
+    else:
+        fhandle = sys.stdin
+    
+    content = ""
+    for line in fhandle:
+        content += line
+
+    if fhandle is not sys.stdin:
+        fhandle.close()
+
+    if args.html:
+        content=unsanitize_html(content)
+    else:
+        content=unsanitize_txt(content)
+
+    if args.file and args.in_situ:
+        st = os.stat(args.file)
+        os.chmod(args.file, st.st_mode | stat.S_IWRITE)
+        with open(args.file, "w+") as fhandle:
+            fhandle.write(content)
+            fhandle.truncate()
+            fhandle.close
+    else:
+        print(content)
+
+if __name__ == "__main__":
+    main()
