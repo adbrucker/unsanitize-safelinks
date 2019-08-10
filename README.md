@@ -1,4 +1,4 @@
-# Unsanitize Safelinks: A Utility for Microsoft's Safelinks
+# [Unsanitize Safelinks](https://git.logicalhacking.com/adbrucker/unsanitize-safelinks): A Utility for Microsoft's Safelinks
 
 Both the home and personal online offerings of Microsoft Outlook (e.g., Outlook.com, Office 365 Home,
 or Office 365 Personal) and the professional Office 365 offerings (e.g., as part of Office 365 Advanced
