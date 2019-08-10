@@ -46,4 +46,4 @@ SPDX-License-Identifier: BSD-2-Clause
 ## Master Repository
 
 The master git repository for this project is hosted
-<https://git.logicalhacking.com/adbrucker/safelinks-tool>.
+<https://git.logicalhacking.com/adbrucker/unsanitize-safelinks>.
