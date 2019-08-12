@@ -33,6 +33,8 @@ import argparse
 import re
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, parse_qs, urlunparse
+import cchardet as chardet
+
 
 def sanitize_safelink(url):
     if "safelinks.protection.outlook.com" in url:
@@ -76,16 +78,16 @@ def main():
 
 # parse command line
     if args.file:
-        fhandle = open(args.file)
+        fhandle = open(args.file, mode="rb")
     else:
-        fhandle = sys.stdin
+        fhandle = sys.stdin.buffer
     
-    content = ""
-    for line in fhandle:
-        content += line
+    data = fhandle.read()
 
-    if fhandle is not sys.stdin:
+    if fhandle is not sys.stdin.buffer:
         fhandle.close()
+
+    content = data.decode(encoding=chardet.detect(data)['encoding'], errors="replace")
 
     if args.html:
         content=unsanitize_html(content)
