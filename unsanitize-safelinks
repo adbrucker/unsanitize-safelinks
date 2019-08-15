@@ -38,8 +38,11 @@ import cchardet as chardet
 
 def sanitize_safelink(url):
     if "safelinks.protection.outlook.com" in url:
-        target = urlparse(parse_qs(urlparse(url).query)['url'][0])
-        return target.geturl()
+        try:
+            target = urlparse(parse_qs(urlparse(url).query)['url'][0])
+            return target.geturl()
+        except:
+            return " Warning: Removed corrupted safelink. "
     else:
         return url
 
