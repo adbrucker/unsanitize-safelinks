@@ -44,8 +44,8 @@ def sanitize_safelink(url):
         return url
 
 def unsanitize_txt(content):
-    return re.sub(
-        r'(http[s]?://(?:[a-zA-Z]|[0-9]|[$-\'\/\+-;=\?-@.&+_]|[!*,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)',
+    url_re = re.compile(r'(http[s]?://(?:[a-zA-Z]|[0-9]|[$-\'\/\+-;=\?-@.&+_]|[!*,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)', re.MULTILINE)
+    return re.sub(url_re,
         lambda x: (sanitize_safelink(x.group(1))), content).rstrip()
 
 def unsanitize_html(content):
