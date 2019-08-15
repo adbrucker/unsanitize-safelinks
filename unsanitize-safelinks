@@ -46,10 +46,14 @@ def sanitize_safelink(url):
     else:
         return url
 
+
 def unsanitize_txt(content):
-    url_re = re.compile(r'(http[s]?://(?:[a-zA-Z]|[0-9]|[$-\'\/\+-;=\?-@.&+_]|[!*,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)', re.MULTILINE)
-    return re.sub(url_re,
-        lambda x: (sanitize_safelink(x.group(1))), content).rstrip()
+    url_re = re.compile(
+        r'(http[s]?://(?:[a-zA-Z]|[0-9]|[$-\'\/\+-;=\?-@.&+_]|[!*,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)',
+        re.MULTILINE)
+    return re.sub(url_re, lambda x: (sanitize_safelink(x.group(1))),
+                  content).rstrip()
+
 
 def unsanitize_html(content):
     soup = BeautifulSoup(content, "html.parser")
@@ -60,42 +64,44 @@ def unsanitize_html(content):
             del a['originalsrc']
     return str(soup)
 
+
 def main():
     """Main function of the safelink tool."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--html",
-        help="HTML",
-        action="store_true",
-        default=False)
-    parser.add_argument(
-        "-i",
-        "--in-situ",
-        help="modify file",
-        action="store_true",
-        default=False)
-    parser.add_argument(
-        "-v", "--verbose", help="increase verbosity", action="store_true")
+    parser.add_argument("--html",
+                        help="HTML",
+                        action="store_true",
+                        default=False)
+    parser.add_argument("-i",
+                        "--in-situ",
+                        help="modify file",
+                        action="store_true",
+                        default=False)
+    parser.add_argument("-v",
+                        "--verbose",
+                        help="increase verbosity",
+                        action="store_true")
     parser.add_argument('file', nargs='?', default=None)
     args = parser.parse_args()
 
-# parse command line
+    # parse command line
     if args.file:
         fhandle = open(args.file, mode="rb")
     else:
         fhandle = sys.stdin.buffer
-    
+
     data = fhandle.read()
 
     if fhandle is not sys.stdin.buffer:
         fhandle.close()
 
-    content = data.decode(encoding=chardet.detect(data)['encoding'], errors="replace")
+    content = data.decode(encoding=chardet.detect(data)['encoding'],
+                          errors="replace")
 
     if args.html:
-        content=unsanitize_html(content)
+        content = unsanitize_html(content)
     else:
-        content=unsanitize_txt(content)
+        content = unsanitize_txt(content)
 
     if args.file and args.in_situ:
         st = os.stat(args.file)
@@ -106,6 +112,7 @@ def main():
             fhandle.close
     else:
         print(content)
+
 
 if __name__ == "__main__":
     main()
