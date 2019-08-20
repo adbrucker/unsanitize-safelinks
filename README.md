@@ -7,8 +7,8 @@ certain treats (e.g., phishing).
 
 For various reasons, one might to rewrite these `"safelinks" back into their original form. The script
 [unsantize-safelinks](./unsantize-safelinks) does exactly this. This can, for example, be used for
-displaying mails with mails nicely in [mutt](https://www.mutt.org). In your "muttrc" you need to 
-add/edit the following configuration:
+displaying mails nicely in [mutt](https://www.mutt.org) or other text-based mail programs. In your 
+".muttrc" you need to add/edit the following configuration:
 
 ```muttrc
 set display_filter="unsanitize-safelinks"
