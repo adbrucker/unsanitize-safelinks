@@ -95,8 +95,11 @@ def main():
     if fhandle is not sys.stdin.buffer:
         fhandle.close()
 
-    content = data.decode(encoding=chardet.detect(data)['encoding'],
-                          errors="replace")
+    encoding = chardet.detect(data)['encoding']
+    if encoding:
+        content = data.decode(encoding=encoding, errors="replace")
+    else:
+        content = data.decode(encoding='utf8', errors="replace")
 
     if args.html:
         content = unsanitize_html(content)
