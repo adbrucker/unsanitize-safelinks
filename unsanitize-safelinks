@@ -47,9 +47,19 @@ def sanitize_safelink(url):
         return url
 
 
+def remove_external_sender_warning_txt(content):
+    warning_re = re.compile(
+        r'\nCAUTION: This email originated from outside of the organization. '
+        +
+        r'Do not click links or open attachments unless you recognize the sender '
+        + r'and know the content is safe.\n', re.MULTILINE)
+    return re.sub(warning_re, lambda x: "", content).rstrip()
+
+
 def unsanitize_txt(content):
     url_re = re.compile(
-        r'(http[s]?://(?:[a-zA-Z]|[0-9]|[$-\'\/\+-;=\?-@.&+_]|[!*,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)',
+        r'(http[s]?://' +
+        '(?:[a-zA-Z]|[0-9]|[$-\'\/\+-;=\?-@.&+_]|[!*,]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)',
         re.MULTILINE)
     return re.sub(url_re, lambda x: (sanitize_safelink(x.group(1))),
                   content).rstrip()
@@ -64,6 +74,17 @@ def unsanitize_html(content):
             del a['originalsrc']
     return str(soup)
 
+def remove_external_sender_warning_html(content):
+    warning_re = re.compile(
+        r'CAUTION: This email originated from outside of the organization. '
+        +
+        r'Do not click links or open attachments unless you recognize the sender '
+        + r'and know the content is safe.', re.MULTILINE)
+    soup = BeautifulSoup(content, "html.parser")
+    for d in soup.findAll('div'):
+        if re.search(warning_re,str(d.text)):
+            d.decompose()
+    return str(soup)
 
 def main():
     """Main function of the safelink tool."""
@@ -103,8 +124,10 @@ def main():
 
     if args.html:
         content = unsanitize_html(content)
+        content = remove_external_sender_warning_html(content)
     else:
         content = unsanitize_txt(content)
+        content = remove_external_sender_warning_txt(content)
 
     if args.file and args.in_situ:
         st = os.stat(args.file)
