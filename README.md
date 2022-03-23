@@ -1,11 +1,11 @@
 # [Unsanitize Safelinks](https://git.logicalhacking.com/adbrucker/unsanitize-safelinks): A Utility for Microsoft's Safelinks
 
-Both the home and personal online offerings of Microsoft Outlook (e.g., Outlook.com, Office 365 Home,
+Both the home/personal online offerings of Microsoft Outlook (e.g., Outlook.com, Office 365 Home,
 or Office 365 Personal) and the professional Office 365 offerings (e.g., as part of Office 365 Advanced
 Threat Detection) might rewrite links in received emails with the goal of protecting users against
-certain treats (e.g., phishing).
+certain threats (e.g., phishing).
 
-For various reasons, one might to rewrite these `"safelinks" back into their original form. The script
+For various reasons, one might to rewrite these "safelinks" back into their original form. The script
 [unsantize-safelinks](./unsantize-safelinks) does exactly this. This can, for example, be used for
 displaying mails nicely in [mutt](https://www.mutt.org) or other text-based mail programs. In your 
 ".muttrc" you need to add/edit the following configuration:
